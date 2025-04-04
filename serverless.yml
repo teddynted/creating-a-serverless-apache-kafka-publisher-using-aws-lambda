@@ -11,6 +11,8 @@ provider:
   environment:
     KAFKA_BROKER: ${env:KAFKA_BROKER}
     KAFKA_TOPIC: ${env:KAFKA_TOPIC}
+    KAFKA_USERNAME: ${env:KAFKA_USERNAME}
+    KAFKA_PASSWORD: ${env:KAFKA_PASSWORD}
 
 functions:
   Producer:
