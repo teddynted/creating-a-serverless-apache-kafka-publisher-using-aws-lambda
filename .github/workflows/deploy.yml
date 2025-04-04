@@ -14,6 +14,8 @@ jobs:
     env:
       KAFKA_BROKER: ${{ secrets.KAFKA_BROKER }}
       KAFKA_TOPIC: ${{ secrets.KAFKA_TOPIC }}
+      KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
+      KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
 
     defaults:
       run:
@@ -58,6 +60,8 @@ jobs:
       run: |
         export KAFKA_BROKER=${{ env.KAFKA_BROKER }}
         export KAFKA_TOPIC=${{ env.KAFKA_TOPIC }}
+        export KAFKA_USERNAME=${{ env.KAFKA_USERNAME }}
+        export KAFKA_PASSWORD=${{ env.KAFKA_PASSWORD }}
 
     - name: Install the latest serverless
       run: npm i serverless -g
