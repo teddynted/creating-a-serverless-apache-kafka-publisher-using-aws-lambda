@@ -8,12 +8,37 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/xdg/scram"
 )
 
 type Event struct {
 	Topic string `json:"topic"`
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+type XDGSCRAMClient struct {
+	*scram.Client
+	*scram.ClientConversation
+}
+
+func (x *XDGSCRAMClient) Begin(userName, password, authzID string) error {
+	client, err := scram.SHA256.NewClient(userName, password, authzID)
+	if err != nil {
+		return err
+	}
+	x.Client = client
+	conv := client.NewConversation()
+	x.ClientConversation = conv
+	return nil
+}
+
+func (x *XDGSCRAMClient) Step(challenge string) (string, error) {
+	return x.ClientConversation.Step(challenge)
+}
+
+func (x *XDGSCRAMClient) Done() bool {
+	return x.ClientConversation.Done()
 }
 
 func saramaConfig() *sarama.Config {
@@ -27,6 +52,9 @@ func saramaConfig() *sarama.Config {
 	config.Net.SASL.Handshake = true
 	config.Net.SASL.User = os.Getenv("KAFKA_USERNAME")
 	config.Net.SASL.Password = os.Getenv("KAFKA_PASSWORD")
+	config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
+		return &XDGSCRAMClient{}
+	}
 	config.Net.SASL.Mechanism = sarama.SASLTypeSCRAMSHA256
 
 	// TLS (optional but recommended)
