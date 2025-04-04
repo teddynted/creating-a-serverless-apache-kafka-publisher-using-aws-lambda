@@ -1,4 +1,4 @@
-service: apache-kafka-producer
+service: self-hosted-apache-kafka-producer
 
 frameworkVersion: "3"
 configValidationMode: error
@@ -7,7 +7,7 @@ provider:
   name: aws
   architecture: arm64
   region: ${env:AWS_REGION}
-  stage: "prod"
+  stage: "dev"
   environment:
     KAFKA_BROKER: ${env:KAFKA_BROKER}
     KAFKA_TOPIC: ${env:KAFKA_TOPIC}
