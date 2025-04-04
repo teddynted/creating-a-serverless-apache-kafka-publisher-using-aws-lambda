@@ -1,0 +1,38 @@
+# Compiled binaries
+main
+*.exe
+*.out
+*.test
+
+# Archives & compressed files
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+
+# Build directories
+/build/
+/bin/
+/pkg/
+
+# Dependency files
+vendor/
+Gopkg.lock
+go.sum
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs and temporary files
+*.log
+*.tmp
+*.cache
+
+# Environment Variable
+*.env
+
+# AWS Lambda deployment package
+function.zip

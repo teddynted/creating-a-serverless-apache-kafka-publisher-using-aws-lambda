@@ -1,0 +1,17 @@
+pre-commit:
+  commands:
+    lint:
+      run: |
+        golangci-lint --version
+        golangci-lint run
+
+pre-push:
+  commands:
+    tidy:
+      run: go mod tidy
+    lint: 
+      run: | 
+        golangci-lint --version
+        golangci-lint run
+    make:
+      run: rm -rf build && make build && make zip

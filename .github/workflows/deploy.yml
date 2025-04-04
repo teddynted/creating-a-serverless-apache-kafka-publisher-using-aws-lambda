@@ -1,0 +1,68 @@
+name: 'Deploy'
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  Deploy:
+    name: 'Deploy'
+    runs-on: ubuntu-latest
+    env:
+      KAFKA_BROKER: ${{ secrets.KAFKA_BROKER }}
+      KAFKA_TOPIC: ${{ secrets.KAFKA_TOPIC }}
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
+      
+    # Configure AWS Credentials
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+            
+    - name: Setup Go environment
+      uses: actions/setup-go@v5
+
+    - uses: evantorrie/mott-the-tidier@v1-beta
+      with:
+        gomods: |
+          **/go.mod
+          go.mod
+          -tools/go.mod
+
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Auto-fix go.sum discrepancies
+    
+    # This step builds the Go application and creates a zip file containing the binary
+    # It is important to note that the binary must be named "bootstrap"
+    - name: Build Go application
+      run: |    
+        rm -rf build && make build && make zip
+
+    - name: Export Environment Variables
+      run: |
+        export KAFKA_BROKER=${{ env.KAFKA_BROKER }}
+        export KAFKA_TOPIC=${{ env.KAFKA_TOPIC }}
+
+    - name: Install the latest serverless
+      run: npm i serverless -g
+
+    - name: Serverless deploy
+      uses: serverless/github-action@v3.2
+      with:
+        args: deploy --verbose

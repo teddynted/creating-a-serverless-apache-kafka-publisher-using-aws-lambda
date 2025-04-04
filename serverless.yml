@@ -1,0 +1,53 @@
+service: apache-kafka-producer
+
+frameworkVersion: "3"
+configValidationMode: error
+
+provider:
+  name: aws
+  architecture: arm64
+  region: ${env:AWS_REGION}
+  stage: "prod"
+  environment:
+    KAFKA_BROKER: ${env:KAFKA_BROKER}
+    KAFKA_TOPIC: ${env:KAFKA_TOPIC}
+
+functions:
+  Producer:
+    handler: bootstrap
+    runtime: provided.al2
+    package:
+      artifact: build/apache-kafka-producer.zip
+      individually: true
+    role: { "Fn::GetAtt": ["ProducerLambdaIamRole", "Arn"] }
+    name: apache-kafka-producer
+    memorySize: 128
+    timeout: 240
+
+resources:
+  Resources:
+    ProducerLambdaIamRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - "lambda.amazonaws.com"
+              Action:
+                - "sts:AssumeRole"
+        Path: "/"
+        Policies:   
+          - PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Action:
+                    - "logs:CreateLogGroup"
+                    - "logs:CreateLogStream"
+                    - "logs:PutLogEvents"
+                  Effect: "Allow"
+                  Resource: "*"
+            PolicyName: !Join ["", [{"Ref": "AWS::StackName"}, "-lambda-log"]]
+    
