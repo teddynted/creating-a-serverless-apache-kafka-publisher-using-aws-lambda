@@ -83,7 +83,7 @@ func KafkaProducer(ctx context.Context, event Event) error {
 	defer producer.Close()
 
 	msg := &sarama.ProducerMessage{
-		Topic: event.Topic,
+		Topic: os.Getenv("KAFKA_TOPIC"),
 		Key:   sarama.StringEncoder(event.Key),
 		Value: sarama.StringEncoder(event.Value),
 	}
