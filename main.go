@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"log"
 	"os"
+	"time"
 
 	"github.com/IBM/sarama"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -21,6 +22,8 @@ type XDGSCRAMClient struct {
 	*scram.Client
 	*scram.ClientConversation
 }
+
+// Create a new SCRAM client instance for authenticating to Kafka using SASL/SCRAM
 
 func (x *XDGSCRAMClient) Begin(userName, password, authzID string) error {
 	client, err := scram.SHA256.NewClient(userName, password, authzID)
@@ -46,6 +49,11 @@ func saramaConfig() *sarama.Config {
 
 	// Kafka version
 	config.Version = sarama.V3_9_0_0 // Adjust according to your Kafka version
+	config.Producer.Return.Successes = true
+	config.Producer.RequiredAcks = sarama.WaitForAll
+	config.Producer.Retry.Max = 5
+	config.Producer.Compression = sarama.CompressionSnappy
+	config.Producer.Flush.Frequency = 500 * time.Millisecond
 
 	// SASL/SCRAM Authentication
 	config.Net.SASL.Enable = true
