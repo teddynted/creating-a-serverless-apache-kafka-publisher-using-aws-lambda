@@ -92,8 +92,8 @@ func KafkaProducer(ctx context.Context, event Event) error {
 
 	msg := &sarama.ProducerMessage{
 		Topic: os.Getenv("KAFKA_TOPIC"),
-		Key:   sarama.StringEncoder(event.Key),
-		Value: sarama.StringEncoder(event.Value),
+		//Key:   sarama.StringEncoder(event.Key),
+		Value: sarama.StringEncoder("Message " + time.Now().Format(time.RFC3339Nano)),
 	}
 
 	partition, offset, err := producer.SendMessage(msg)
